@@ -14,6 +14,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import java.net.URL;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.*;
@@ -21,20 +23,35 @@ import com.androidquery.callback.*;
 public class ImageAdapter extends BaseAdapter {
     
     private Context mContext;
+    public TreeMap<Integer, String> images = new TreeMap<String, String>();
 
     public ImageAdapter(Context c) {
         mContext = c;
     }
 
     public int getCount() {
-        return mThumbIds.length;
+        
+        int count = 0;
+        Entry<Integer, String> lastEntry = null;
+        for (Entry<Integer, String> entry : images.entrySet()) {
+            
+            //if(a==null && b.label==1 || a && b.label== a.label+1){
+            if( lastEntry==null && entry.getKey()==1 || lastEntry!=null && entry.getKey()==lastEntry.getKey()){
+                count++;
+            }else{
+                return count;
+            }
+        }
+        return count;
     }
 
     public Object getItem(int position) {
+        //not implemented
         return null;
     }
 
     public long getItemId(int position) {
+        //not implemented
         return 0;
     }
 
@@ -53,6 +70,11 @@ public class ImageAdapter extends BaseAdapter {
         }
             
         AQuery aq = new AQuery(imageView);
+        
+        for (Entry<String, String> entry : images.entrySet()) {
+            
+        }
+        
         String imageUrl = "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcS_-P9g3nyz3zJoho6jyDozyySPN61RMxhu68hOqT7mvRpG1xA024BcX0XI"; 
         
         aq.ajax(imageUrl, Bitmap.class, new AjaxCallback<Bitmap>() {
@@ -65,23 +87,4 @@ public class ImageAdapter extends BaseAdapter {
         
         return imageView;
     }
-
-    // references to our images
-    
-    //sample image
-    //https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcS_-P9g3nyz3zJoho6jyDozyySPN61RMxhu68hOqT7mvRpG1xA024BcX0XI
-    
-    private Integer[] mThumbIds = {
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-    };
 }
