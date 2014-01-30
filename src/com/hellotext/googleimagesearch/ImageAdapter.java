@@ -14,6 +14,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -23,36 +24,41 @@ import com.androidquery.callback.*;
 public class ImageAdapter extends BaseAdapter {
     
     private Context mContext;
-    public TreeMap<Integer, String> images = new TreeMap<String, String>();
+    //public TreeMap<Integer, String> images = new TreeMap<String, String>();
+    
+    
+    
+    private ArrayList<ImageResult> resultsBuffer = new ArrayList();
+    private ArrayList<ImageResult> results = new ArrayList();
 
     public ImageAdapter(Context c) {
         mContext = c;
     }
 
     public int getCount() {
-        
-        int count = 0;
-        Entry<Integer, String> lastEntry = null;
-        for (Entry<Integer, String> entry : images.entrySet()) {
-            
-            //if(a==null && b.label==1 || a && b.label== a.label+1){
-            if( lastEntry==null && entry.getKey()==1 || lastEntry!=null && entry.getKey()==lastEntry.getKey()){
-                count++;
-            }else{
-                return count;
-            }
-        }
-        return count;
+        return results.size();
     }
 
     public Object getItem(int position) {
-        //not implemented
-        return null;
+        return results.get(position);
     }
 
     public long getItemId(int position) {
         //not implemented
         return 0;
+    }
+    
+    public void addResults(ArrayList<ImageResult> reuslts){
+        resultsBuffer.addAll(results);
+        ImageResult next;
+        while((next=getNextBuffered())!=null){
+            results.add(next);
+        }
+    }
+    
+    private ImageResult getNextBuffered(){
+        ImageResult lastPopped = results.get(results.size()-1);
+        
     }
 
     // create a new ImageView for each item referenced by the Adapter
