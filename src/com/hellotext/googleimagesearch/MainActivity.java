@@ -25,7 +25,7 @@ import android.widget.GridView;
 
 public class MainActivity extends Activity {
     
-    private final int MAX_RESULT_COUNT = 50;
+    public final int MAX_RESULT_COUNT = 50;
     private final int MAX_CONCURRENT_REQUESTS = 4;
     private final int PAGE_SIZE = 8;
     private final String SEARCH_ENDPOINT = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=" + PAGE_SIZE;
@@ -70,6 +70,10 @@ public class MainActivity extends Activity {
                             final ImageResult imageResult = new ImageResult();
                             imageResult.imgUrl = results.getJSONObject(i).getString("tbUrl");
                             imageResult.resultIndex = start + i;
+                            
+                            if(imageResult.resultIndex >= MAX_RESULT_COUNT){
+                                continue;
+                            }
                             
                             //Load the image for this result in background before adding to adaptor
                             aq.ajax(imageResult.imgUrl, Bitmap.class, new AjaxCallback<Bitmap>() {

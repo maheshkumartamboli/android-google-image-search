@@ -21,7 +21,7 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     public int getCount() {
-        return contiguousResults;
+        return Math.min(contiguousResults, context.MAX_RESULT_COUNT);
     }
 
     public Object getItem(int position) {
