@@ -12,6 +12,7 @@ import android.support.v4.util.SimpleArrayMap;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -68,9 +69,12 @@ public class ImageAdapter extends BaseAdapter {
         
         if (convertView == null) {  // if it's not recycled, initialize some attributes
             imageView = new ImageView(context);
-            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
+            //imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
+            //imageView.seta
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(8, 8, 8, 8);
+            //imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            //imageView.setPadding(8, 8, 8, 8);
+            imageView.setLayoutParams(new GridView.LayoutParams(LayoutParams.FILL_PARENT, 300));
         } else {
             imageView = (ImageView) convertView;
             imageView.setImageResource(android.R.color.transparent);
