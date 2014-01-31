@@ -4,8 +4,13 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    <!-- 
+    minSdkVersion Reasoning / dependencies
+    8 - default / recommended
+    12 - required for LruCache (image cache)
+     -->
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="12"
         android:targetSdkVersion="18" />
     
     <uses-permission android:name="android.permission.INTERNET" />

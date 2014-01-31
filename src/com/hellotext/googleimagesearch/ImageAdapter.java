@@ -1,5 +1,6 @@
 package com.hellotext.googleimagesearch;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -7,6 +8,8 @@ import java.net.MalformedURLException;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.util.SimpleArrayMap;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -23,24 +26,20 @@ import com.androidquery.callback.*;
 
 public class ImageAdapter extends BaseAdapter {
     
-    private Context mContext;
-    //public TreeMap<Integer, String> images = new TreeMap<String, String>();
-    
-    
-    
-    private ArrayList<ImageResult> resultsBuffer = new ArrayList();
-    private ArrayList<ImageResult> results = new ArrayList();
+    private MainActivity context;
+    private int contiguousResults = 0; //Contiguous results form front of results array
+    private SimpleArrayMap<Integer, ImageResult> results = new SimpleArrayMap<Integer, ImageResult>();
 
-    public ImageAdapter(Context c) {
-        mContext = c;
+    public ImageAdapter(MainActivity context) {
+        this.context = context;
     }
 
     public int getCount() {
-        return results.size();
+        return contiguousResults;
     }
 
     public Object getItem(int position) {
-        return results.get(position);
+        return results.valueAt(position);
     }
 
     public long getItemId(int position) {
@@ -48,49 +47,38 @@ public class ImageAdapter extends BaseAdapter {
         return 0;
     }
     
-    public void addResults(ArrayList<ImageResult> reuslts){
-        resultsBuffer.addAll(results);
-        ImageResult next;
-        while((next=getNextBuffered())!=null){
-            results.add(next);
-        }
-    }
-    
-    private ImageResult getNextBuffered(){
-        ImageResult lastPopped = results.get(results.size()-1);
-        
+    public void addResult(ImageResult result){
+       this.results.put(result.resultIndex, result);
+       
+       //recalculate contiguous result count
+       int i = contiguousResults;
+       while(results.get(i) != null){
+           i++;
+       }
+       
+       if(i!=contiguousResults){
+           contiguousResults = i;
+           notifyDataSetChanged();
+       }
     }
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-        
         final ImageView imageView;
         
         if (convertView == null) {  // if it's not recycled, initialize some attributes
-            imageView = new ImageView(mContext);
+            imageView = new ImageView(context);
             imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setPadding(8, 8, 8, 8);
         } else {
             imageView = (ImageView) convertView;
-        }
-            
-        AQuery aq = new AQuery(imageView);
-        
-        for (Entry<String, String> entry : images.entrySet()) {
-            
+            imageView.setImageResource(android.R.color.transparent);
         }
         
-        String imageUrl = "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcS_-P9g3nyz3zJoho6jyDozyySPN61RMxhu68hOqT7mvRpG1xA024BcX0XI"; 
-        
-        aq.ajax(imageUrl, Bitmap.class, new AjaxCallback<Bitmap>() {
-
-            @Override
-            public void callback(String url, Bitmap bitmap, AjaxStatus status) {
-                imageView.setImageBitmap(bitmap);
-            }
-        });
-        
+        String imageUrl = results.get(position).imgUrl;
+        imageView.setImageBitmap(context.imageCache.get(imageUrl));
+                
         return imageView;
     }
 }
