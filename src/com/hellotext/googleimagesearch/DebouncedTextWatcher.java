@@ -1,13 +1,7 @@
 package com.hellotext.googleimagesearch;
 import android.os.SystemClock;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
 import android.text.Editable;
 import android.text.TextWatcher;
-
-import java.util.Map;
-import java.util.WeakHashMap;
 
 //http://stackoverflow.com/questions/16534369/avoid-button-multiple-rapid-clicks
 public abstract class DebouncedTextWatcher implements TextWatcher {
