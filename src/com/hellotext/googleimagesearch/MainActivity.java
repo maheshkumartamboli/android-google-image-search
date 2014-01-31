@@ -12,6 +12,7 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.BitmapAjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -42,10 +43,9 @@ public class MainActivity extends Activity {
     
     public MainActivity(){
         super();
-        resultsImageAdapter = new ImageAdapter(this);
     }
 
-    protected void asyncJson(String url, final int start){
+    protected void asyncJson(String url, final int start, final ImageAdapter searchResultsAdapter){
         
         Log.i("GoogleImageSearch", "About to send request for: " + url);
         
@@ -68,6 +68,13 @@ public class MainActivity extends Activity {
         aq.ajax(url, JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject json, AjaxStatus status) {
+                
+                /*
+                 * TODO: Extend AjaxCallback so this line written once and can be reused for other AJAX
+                 * queries that should only continue if they are results for the "current" search
+                 */ 
+                if(!isAttached(searchResultsAdapter)) return;
+                
                 if(json != null){
                     try{
                         JSONObject responseData = json.getJSONObject("responseData");
@@ -83,6 +90,8 @@ public class MainActivity extends Activity {
                             aq.ajax(imageResult.imgUrl, Bitmap.class, new AjaxCallback<Bitmap>() {
                                 @Override
                                 public void callback(String url, Bitmap bitmap, AjaxStatus status) {
+                                    
+                                    if(!isAttached(searchResultsAdapter)) return;
                                     
                                     Log.i("GoogleImageSearch", "Received image data, adding to cache");
                                     
@@ -102,10 +111,16 @@ public class MainActivity extends Activity {
         });
     }
     
-    protected void runSearch(){
+    protected boolean isAttached(ImageAdapter adapter){
+        return resultsGrid.getAdapter()==adapter;
+    }
+    
+    protected void runSearch(String query){
+
+        //Perform the search
         for(int i=0;i<MAX_RESULT_COUNT;i+=PAGE_SIZE){
             try {
-                asyncJson(SEARCH_ENDPOINT + "&q=" + URLEncoder.encode("cat", "UTF-8") + "&start=" + i, i);
+                asyncJson(SEARCH_ENDPOINT + "&q=" + URLEncoder.encode(query, "UTF-8") + "&start=" + i, i, resultsImageAdapter);
             } catch (UnsupportedEncodingException e) {
                 // TODO: handle error
             }
@@ -114,6 +129,8 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        
+        final MainActivity self = this;
 
         //set the max number of concurrent network connections, default is 4
         AjaxCallback.setNetworkLimit(16);
@@ -128,15 +145,21 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         resultsGrid = (GridView) findViewById(R.id.grid_view);
-        resultsGrid.setAdapter(resultsImageAdapter);        
 
         final EditText searchInput = (EditText) findViewById(R.id.search_input);
         searchInput.addTextChangedListener(
             new DebouncedTextWatcher(1000) {
                 @Override
                 public void onDebouncedTextChanged(CharSequence s, int start, int before, int count) {
-                    Log.i("GoogleImageSearch", "debounced text changed");
-                    runSearch();
+                    String query = searchInput.getText().toString();
+                    //runSearch(query);
+                    
+                    //Trash the last query results if there was one
+                    resultsImageAdapter = new ImageAdapter(self);
+                    resultsGrid.setAdapter(resultsImageAdapter);
+                    resultsGrid.invalidateViews();                    
+                    
+                    new SearchTask(self).execute(searchInput.getText().toString());
                 }
             }
         );
@@ -150,5 +173,25 @@ public class MainActivity extends Activity {
         return true;
     }
 
+}
+
+class SearchTask extends AsyncTask<String, Void, Void> {
+    
+    private MainActivity context;
+    
+    public SearchTask(MainActivity context){
+        this.context = context;
+    }
+    
+    protected Void doInBackground(String... args) {
+        Log.i("GoogleImageSearch", "starting doInBackground");
+        context.runSearch(args[0]);
+        return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {}
+    protected void onPostExecute(Long result) {
+        Log.i("GoogleImageSearch", "onPostExecute called");
+    }
 }
 
