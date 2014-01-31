@@ -21,13 +21,13 @@
 	        android:layout_weight="4"
 	        android:layout_height="wrap_content"
 	        />
-
 	    <Button
 	        android:id="@+id/search_button"
 	        android:text="Search"
 	        android:layout_width="0dp"
 	        android:layout_weight="2"
 	        android:layout_height="wrap_content"
+	        android:onClick="searchButtonClick"
 	        />
     </LinearLayout>
     

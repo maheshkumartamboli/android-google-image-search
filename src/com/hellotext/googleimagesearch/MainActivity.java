@@ -15,6 +15,7 @@ import com.androidquery.callback.AjaxStatus;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.text.Editable;
@@ -25,6 +26,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -133,37 +136,31 @@ public class MainActivity extends Activity {
         final MainActivity self = this;
 
         //set the max number of concurrent network connections, default is 4
-        AjaxCallback.setNetworkLimit(16);
+        AjaxCallback.setNetworkLimit(3);
 
         //set the max size of the memory cache, default is 1M pixels (4MB)
         BitmapAjaxCallback.setMaxPixelLimit(0);
-        
-        BitmapAjaxCallback.setCacheLimit(50);
-        BitmapAjaxCallback.setIconCacheLimit(50);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         resultsGrid = (GridView) findViewById(R.id.grid_view);
-
+    }
+    
+    public void searchButtonClick(View view){
         final EditText searchInput = (EditText) findViewById(R.id.search_input);
-        searchInput.addTextChangedListener(
-            new DebouncedTextWatcher(1000) {
-                @Override
-                public void onDebouncedTextChanged(CharSequence s, int start, int before, int count) {
-                    String query = searchInput.getText().toString();
-                    //runSearch(query);
-                    
-                    //Trash the last query results if there was one
-                    resultsImageAdapter = new ImageAdapter(self);
-                    resultsGrid.setAdapter(resultsImageAdapter);
-                    resultsGrid.invalidateViews();                    
-                    
-                    new SearchTask(self).execute(searchInput.getText().toString());
-                }
-            }
-        );
+        String query = searchInput.getText().toString();
+        //runSearch(query);
         
+        //Trash the last query results if there was one
+        resultsImageAdapter = new ImageAdapter(this);
+        resultsGrid.setAdapter(resultsImageAdapter);
+        resultsGrid.invalidateViews();                    
+        
+        new SearchTask(this).execute(searchInput.getText().toString());  
+        
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);        
     }
 
     @Override
